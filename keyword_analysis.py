@@ -2219,6 +2219,7 @@ def _keyword_analysis_prompt(keywords: list[str], target_scenario: str = "") -> 
    - short_term: 앞으로 3개월 내 실행할 가장 효과 큰 액션 1~2개.
      "~을 하세요"가 아니라 "무엇을, 왜, 어떤 순서로"까지 구체적으로.
    - mid_term: 1년 내 보강 방향. 목표 시나리오(target)가 있으면 반드시 그에 정렬.
+   - long_term: 1년 이상 장기 방향 — 이 역량을 기반으로 향후 커리어가 나아갈 큰 방향.
    - priority_keyword: 분석 키워드 중 가장 시급히 보강해야 할 키워드 1개와 이유.
      (coverage가 낮거나 high 근거가 없는 키워드가 우선 후보)
 2. 모든 개선 항목(information_enhancement, experience_expansion)에
@@ -2352,6 +2353,7 @@ def _keyword_analysis_prompt(keywords: list[str], target_scenario: str = "") -> 
       "current_profile_summary": "현재 경험 풀의 강점·공백 진단 (2~3문장, 분석 결과 근거)",
       "short_term": "단기(3개월 내) 실행 방향 — 가장 효과 큰 액션 1~2개, 순서 포함",
       "mid_term": "중기(1년 내) 보강 방향 — 목표 시나리오에 정렬",
+      "long_term": "장기(1년 이상) 방향 — 이 역량을 기반으로 한 향후 커리어 방향",
       "priority_keyword": "최우선 보강 키워드",
       "priority_reason": "그 키워드가 최우선인 이유 (coverage/근거 강도 기반)"
     }},
@@ -2793,6 +2795,8 @@ def print_result_summary(result: dict) -> None:
             print(f"\n  ▸ 단기 (3개월): {direction['short_term']}")
         if direction.get("mid_term"):
             print(f"  ▸ 중기 (1년) : {direction['mid_term']}")
+        if direction.get("long_term"):
+            print(f"  ▸ 장기 (1년+): {direction['long_term']}")
         if direction.get("priority_keyword"):
             reason = direction.get("priority_reason", "")
             print(f"\n  ★ 최우선 보강 키워드: {direction['priority_keyword']}")
