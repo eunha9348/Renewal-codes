@@ -693,13 +693,9 @@ def main(
 # 실행 예시
 # ══════════════════════════════════════════════
 if __name__ == "__main__":
-    # 실행 예시 — resume 의 main() 은 sources 가 필수 인자이므로
-    # 다른 파일처럼 빈 main() 으로 둘 수 없다. 아래 값을 채워 실행한다.
     main(
         sources=[
-            "여기에 URL / 파일 경로 / 텍스트를 입력하세요",
-            # "https://example.com/portfolio",
-            # "/path/to/career.txt",
+            "",
         ],
         name_ko="",
         name_en="",
