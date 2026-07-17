@@ -1,0 +1,100 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>개별 분석 · individual.py — API 계약 정합화</title><style>
+:root{--bg:#ffffff;--fg:#1a1a2e;--muted:#5b6472;--card:#f6f8fb;--border:#e2e8f0;
+--accent:#3b5bdb;--red:#d64545;--green:#1c8c5b;--codebg:#0f172a;--codefg:#e2e8f0;
+--badgebg:#eef2ff;--badgefg:#3b5bdb;}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1420;--fg:#e6e9ef;--muted:#9aa4b2;
+--card:#161d2b;--border:#26304060;--accent:#7c94f4;--red:#ff7a7a;--green:#57d996;
+--codebg:#0b1020;--codefg:#dbe4ff;--badgebg:#1e2740;--badgefg:#9db2ff;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",
+"Malgun Gothic",sans-serif;line-height:1.7;font-size:16px}
+.wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.04em;font-size:.82rem;
+text-transform:uppercase;margin:0 0 6px}
+h1{font-size:1.85rem;margin:0 0 6px;line-height:1.25}
+.sub{color:var(--muted);margin:0 0 26px;font-size:.98rem}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 30px}
+.chip{background:var(--badgebg);color:var(--badgefg);border-radius:999px;
+padding:5px 13px;font-size:.8rem;font-weight:600}
+h2{font-size:1.28rem;margin:38px 0 6px;padding-top:14px;border-top:1px solid var(--border)}
+h3{font-size:1.04rem;margin:22px 0 8px}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+padding:18px 20px;margin:16px 0}
+.problem{border-left:4px solid var(--red)}
+.solution{border-left:4px solid var(--green)}
+.tag{display:inline-block;font-size:.74rem;font-weight:700;border-radius:6px;
+padding:2px 8px;margin-right:8px;vertical-align:middle}
+.tag.p{background:rgba(214,69,69,.14);color:var(--red)}
+.tag.s{background:rgba(28,140,91,.16);color:var(--green)}
+.ref{color:var(--muted);font-size:.82rem;font-weight:600}
+pre{background:var(--codebg);color:var(--codefg);border-radius:10px;padding:14px 16px;
+overflow-x:auto;font-size:.86rem;line-height:1.55;margin:10px 0}
+code{font-family:"SF Mono",Menlo,Consolas,monospace}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.ba{grid-template-columns:1fr}}
+.ba h4{margin:0 0 6px;font-size:.85rem;font-weight:700}
+.ba .b h4{color:var(--red)}.ba .a h4{color:var(--green)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.9rem;
+display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--badgebg);color:var(--badgefg);font-weight:700;white-space:nowrap}
+tt,.mono{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--badgebg);
+color:var(--badgefg);border-radius:5px;padding:1px 6px;font-size:.85em}
+.note{background:var(--badgebg);border-radius:10px;padding:12px 16px;margin:16px 0;
+font-size:.9rem;color:var(--fg)}
+.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
+color:var(--muted);font-size:.82rem}
+</style></head><body><div class="wrap">
+<p class="eyebrow">분석·Export API 정합화 · 변경정리</p>
+<h1>개별 분석 · individual.py — API 계약 정합화</h1>
+<p class="sub">단일 경력/자격증/활동 심층 분석기의 반환 형식을 공통 envelope로 통일했습니다.</p>
+<div class="meta">
+<span class="chip">대상: individual.py</span>
+<span class="chip">기능: 개별분석</span>
+<span class="chip">근거: §3.3[1] · §3.6 · #25 · #26</span>
+<span class="chip">출력 내용 불변</span>
+</div>
+<div class="note">🎯 <b>대원칙</b> — 출력 <b>내용</b>(분석 결과·자소서 본문·레쥬메 필드 값)은 한 글자도 바꾸지 않았습니다. 백엔드·프론트가 공유하는 <b>반환 형식(envelope)</b>만 계약 문서에 맞춰 통일했습니다. <tt>schema_version</tt>은 문서 §3.5에 따라 <b>tasks.py(백엔드)가 주입</b>하므로 이 파일에는 넣지 않았습니다.</div>
+<h2>1. main()이 envelope를 반환하지 않던 문제</h2>
+<div class="card problem">
+<p><span class="tag p">문제</span>main()이 결과를 <tt>print</tt>만 하고 <b>아무것도 return하지 않았습니다</b>. tasks.py는 <tt>r = main(...)</tt>로 반환값의 <tt>status·result·vector</tt>를 읽어야 하는데 받을 값이 없었습니다. <span class="ref">계약 §3.3 [1] analyzer 반환 shape</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span>main() 마지막에서 <b>공통 envelope</b> <tt>{status, result, vector}</tt>를 조립해 <tt>print</tt>와 함께 <b>return</b>하도록 변경.</p>
+<div class="ba">
+<div class="b"><h4>Before</h4><pre><code>print(json.dumps(
+  {"vector": vector, "result": result},
+  ensure_ascii=False, indent=2))
+# ← return 없음</code></pre></div>
+<div class="a"><h4>After</h4><pre><code>envelope = {"status": "success",
+            "result": payload,
+            "vector": vector}
+print(json.dumps(envelope, ...))
+return envelope</code></pre></div>
+</div>
+</div>
+<h2>2. result(payload) 안에 status가 섞여 나가던 문제</h2>
+<div class="card problem">
+<p><span class="tag p">문제</span><tt>_call_model()</tt>이 돌려준 payload는 최상위에 <tt>status</tt>를 갖고 있어, 그대로 저장하면 <tt>data.result.status</tt>로 프론트에 노출됩니다. <span class="ref">계약 §3.6 #26 (result 안에 status 없음)</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span>payload에서 <tt>status</tt> 키를 제거하고 envelope 최상위로만 올렸습니다. <tt>payload = {k:v for k,v in result.items() if k != "status"}</tt></p>
+</div>
+<h2>3. vector가 result 안으로 들어갈 위험</h2>
+<div class="card problem">
+<p><span class="tag p">문제</span>개별·종합만 벡터(3072차원)를 실어 주므로, 무심코 result에 함께 담으면 분석 1건당 ~60KB가 중복 저장되고 매 조회마다 프론트로 흘러갑니다. <span class="ref">계약 §3.2 · §3.6 #25 (result 안에 vector 없음)</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span><tt>vector</tt>는 envelope의 <b>별도 필드</b>로만 반환합니다. result(payload) 안에는 절대 넣지 않습니다. (개별·종합은 vector 필드 포함)</p>
+</div>
+<h2>4. 짧은 입력 처리</h2>
+<div class="card problem">
+<p><span class="tag p">문제</span>입력이 너무 짧을 때 error 메시지를 print만 하고 <tt>return</tt>(None)했습니다. <span class="ref">계약 §3.3 실패 shape</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span><tt>return error_result</tt> (<tt>{status:'error', message}</tt>)로 실패 envelope를 반환합니다.</p>
+</div>
+<div class="foot">기준 문서: Export · 분석 API Endpoint 설계 (arc-backend@dev 6d840cc). 이 문서는 individual.py의 반환 형식 변경만 다루며, 분석 로직·프롬프트·출력 텍스트는 불변입니다.</div>
+</div></body></html>

@@ -1,0 +1,103 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>키워드 분석 · keyword_analysis.py — API 계약 정합화</title><style>
+:root{--bg:#ffffff;--fg:#1a1a2e;--muted:#5b6472;--card:#f6f8fb;--border:#e2e8f0;
+--accent:#3b5bdb;--red:#d64545;--green:#1c8c5b;--codebg:#0f172a;--codefg:#e2e8f0;
+--badgebg:#eef2ff;--badgefg:#3b5bdb;}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1420;--fg:#e6e9ef;--muted:#9aa4b2;
+--card:#161d2b;--border:#26304060;--accent:#7c94f4;--red:#ff7a7a;--green:#57d996;
+--codebg:#0b1020;--codefg:#dbe4ff;--badgebg:#1e2740;--badgefg:#9db2ff;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",
+"Malgun Gothic",sans-serif;line-height:1.7;font-size:16px}
+.wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.04em;font-size:.82rem;
+text-transform:uppercase;margin:0 0 6px}
+h1{font-size:1.85rem;margin:0 0 6px;line-height:1.25}
+.sub{color:var(--muted);margin:0 0 26px;font-size:.98rem}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 30px}
+.chip{background:var(--badgebg);color:var(--badgefg);border-radius:999px;
+padding:5px 13px;font-size:.8rem;font-weight:600}
+h2{font-size:1.28rem;margin:38px 0 6px;padding-top:14px;border-top:1px solid var(--border)}
+h3{font-size:1.04rem;margin:22px 0 8px}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+padding:18px 20px;margin:16px 0}
+.problem{border-left:4px solid var(--red)}
+.solution{border-left:4px solid var(--green)}
+.tag{display:inline-block;font-size:.74rem;font-weight:700;border-radius:6px;
+padding:2px 8px;margin-right:8px;vertical-align:middle}
+.tag.p{background:rgba(214,69,69,.14);color:var(--red)}
+.tag.s{background:rgba(28,140,91,.16);color:var(--green)}
+.ref{color:var(--muted);font-size:.82rem;font-weight:600}
+pre{background:var(--codebg);color:var(--codefg);border-radius:10px;padding:14px 16px;
+overflow-x:auto;font-size:.86rem;line-height:1.55;margin:10px 0}
+code{font-family:"SF Mono",Menlo,Consolas,monospace}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.ba{grid-template-columns:1fr}}
+.ba h4{margin:0 0 6px;font-size:.85rem;font-weight:700}
+.ba .b h4{color:var(--red)}.ba .a h4{color:var(--green)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.9rem;
+display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--badgebg);color:var(--badgefg);font-weight:700;white-space:nowrap}
+tt,.mono{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--badgebg);
+color:var(--badgefg);border-radius:5px;padding:1px 6px;font-size:.85em}
+.note{background:var(--badgebg);border-radius:10px;padding:12px 16px;margin:16px 0;
+font-size:.9rem;color:var(--fg)}
+.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
+color:var(--muted);font-size:.82rem}
+</style></head><body><div class="wrap">
+<p class="eyebrow">분석·Export API 정합화 · 변경정리</p>
+<h1>키워드 분석 · keyword_analysis.py — API 계약 정합화</h1>
+<p class="sub">오늘 저녁 배포 시 전 섹션 백지가 될 뻔한 A_~F_ 접두사를 전면 제거하고 반환 형식을 통일했습니다.</p>
+<div class="meta">
+<span class="chip">대상: keyword_analysis.py</span>
+<span class="chip">기능: 키워드분석</span>
+<span class="chip">근거: §3.4 · §3.3 · §3.6</span>
+<span class="chip">사고 #4 원인 해소</span>
+<span class="chip">출력 내용 불변</span>
+</div>
+<div class="note">🎯 <b>대원칙</b> — 출력 <b>내용</b>(분석 결과·자소서 본문·레쥬메 필드 값)은 한 글자도 바꾸지 않았습니다. 백엔드·프론트가 공유하는 <b>반환 형식(envelope)</b>만 계약 문서에 맞춰 통일했습니다. <tt>schema_version</tt>은 문서 §3.5에 따라 <b>tasks.py(백엔드)가 주입</b>하므로 이 파일에는 넣지 않았습니다.</div>
+<h2>1. 최상위 키 A_~F_ 순서 접두사 — 사고 #4의 직접 원인</h2>
+<p>문서 §3.4: 접두사는 <b>사람이 읽을 때의 순서 표기</b>일 뿐 데이터의 일부가 아닙니다. JSON은 키 순서를 의미로 갖지 않으므로, 섹션 하나만 추가돼도 뒤 키 이름이 연쇄로 바뀌어 프론트가 조용히 깨집니다. v4.1 머지(18:43) 후 프론트는 접두사 없이 읽어 배포되면 전 섹션 백지가 됩니다.</p>
+<div class="card problem">
+<p><span class="tag p">문제</span>result 최상위 키가 <tt>A_keyword_definitions … F_improvement_guide</tt>로 접두사를 달고 있었고, 프롬프트 스키마·prose 지시·리더 함수(<tt>_enrich_and_tag_result</tt>, <tt>print_result_summary</tt>)가 모두 이 이름에 묶여 있었습니다. <span class="ref">계약 §3.4 (접두사 금지) · 사고 #4</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span>6개 최상위 키에서 접두사를 <b>전면 제거</b>했습니다. 프롬프트 JSON 스키마, prose 참조, 후처리·요약 출력 코드까지 <b>한 번에</b> 맞춰 이름 불일치가 남지 않게 했습니다. 중첩 키(<tt>compliance_criteria·matched_criteria·key_quotes</tt>)는 접두사가 없으므로 그대로 유지.</p>
+</div>
+
+<h3>최상위 키 이름 매핑 (접두사 제거)</h3>
+<table>
+<tr><th>Before (접두사 O)</th><th>After (접두사 X)</th><th>적용 위치</th></tr>
+<tr><td><tt>A_keyword_definitions</tt></td><td><tt>keyword_definitions</tt></td><td rowspan="6">프롬프트 스키마 + prose 지시 + <tt>_enrich_and_tag_result</tt> + <tt>print_result_summary</tt></td></tr>
+<tr><td><tt>B_selection_criteria</tt></td><td><tt>selection_criteria</tt></td></tr>
+<tr><td><tt>C_coverage</tt></td><td><tt>coverage</tt></td></tr>
+<tr><td><tt>D_matched_experiences</tt></td><td><tt>matched_experiences</tt></td></tr>
+<tr><td><tt>E_storylines</tt></td><td><tt>storylines</tt></td></tr>
+<tr><td><tt>F_improvement_guide</tt></td><td><tt>improvement_guide</tt></td></tr>
+</table>
+
+<h2>2. result 안 status 제거 · main() envelope 반환</h2>
+<div class="card problem">
+<p><span class="tag p">문제</span>keyword payload는 <tt>_call_model()</tt>이 넣은 <tt>status</tt>를 최상위에 갖고 있었고, main()은 <tt>{careers, result}</tt>를 반환해 백엔드 계약과 달랐습니다. <span class="ref">계약 §3.3 [1] · §3.6 #26</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span>payload에서 <tt>status</tt> 제거 후 <b>envelope</b> <tt>{status, result}</tt>로 반환. 키워드 테이블엔 vector 컬럼이 없으므로 vector 필드도 없습니다(§3.2).</p>
+<div class="ba">
+<div class="b"><h4>Before</h4><pre><code>def main(...):
+    ...
+    result = analyze_keywords(...)
+    return {"careers": careers,
+            "result": result}</code></pre></div>
+<div class="a"><h4>After</h4><pre><code>def main(...):
+    ...
+    result = analyze_keywords(...)
+    payload = {k:v for k,v in result.items()
+               if k != "status"}
+    return {"status":"success",
+            "result": payload}</code></pre></div>
+</div>
+</div>
+<div class="foot">접두사 제거는 '키 이름' 형식 변경일 뿐, 각 섹션의 분석 내용(정의·coverage 수치·스토리라인 등)은 v4.1 명세 그대로 100% 보존됩니다.</div>
+</div></body></html>

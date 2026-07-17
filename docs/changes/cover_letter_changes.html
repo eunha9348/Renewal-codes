@@ -1,0 +1,93 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>자기소개서 · cover_letter.py — API 계약 정합화</title><style>
+:root{--bg:#ffffff;--fg:#1a1a2e;--muted:#5b6472;--card:#f6f8fb;--border:#e2e8f0;
+--accent:#3b5bdb;--red:#d64545;--green:#1c8c5b;--codebg:#0f172a;--codefg:#e2e8f0;
+--badgebg:#eef2ff;--badgefg:#3b5bdb;}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1420;--fg:#e6e9ef;--muted:#9aa4b2;
+--card:#161d2b;--border:#26304060;--accent:#7c94f4;--red:#ff7a7a;--green:#57d996;
+--codebg:#0b1020;--codefg:#dbe4ff;--badgebg:#1e2740;--badgefg:#9db2ff;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",
+"Malgun Gothic",sans-serif;line-height:1.7;font-size:16px}
+.wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.04em;font-size:.82rem;
+text-transform:uppercase;margin:0 0 6px}
+h1{font-size:1.85rem;margin:0 0 6px;line-height:1.25}
+.sub{color:var(--muted);margin:0 0 26px;font-size:.98rem}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 30px}
+.chip{background:var(--badgebg);color:var(--badgefg);border-radius:999px;
+padding:5px 13px;font-size:.8rem;font-weight:600}
+h2{font-size:1.28rem;margin:38px 0 6px;padding-top:14px;border-top:1px solid var(--border)}
+h3{font-size:1.04rem;margin:22px 0 8px}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+padding:18px 20px;margin:16px 0}
+.problem{border-left:4px solid var(--red)}
+.solution{border-left:4px solid var(--green)}
+.tag{display:inline-block;font-size:.74rem;font-weight:700;border-radius:6px;
+padding:2px 8px;margin-right:8px;vertical-align:middle}
+.tag.p{background:rgba(214,69,69,.14);color:var(--red)}
+.tag.s{background:rgba(28,140,91,.16);color:var(--green)}
+.ref{color:var(--muted);font-size:.82rem;font-weight:600}
+pre{background:var(--codebg);color:var(--codefg);border-radius:10px;padding:14px 16px;
+overflow-x:auto;font-size:.86rem;line-height:1.55;margin:10px 0}
+code{font-family:"SF Mono",Menlo,Consolas,monospace}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.ba{grid-template-columns:1fr}}
+.ba h4{margin:0 0 6px;font-size:.85rem;font-weight:700}
+.ba .b h4{color:var(--red)}.ba .a h4{color:var(--green)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.9rem;
+display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--badgebg);color:var(--badgefg);font-weight:700;white-space:nowrap}
+tt,.mono{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--badgebg);
+color:var(--badgefg);border-radius:5px;padding:1px 6px;font-size:.85em}
+.note{background:var(--badgebg);border-radius:10px;padding:12px 16px;margin:16px 0;
+font-size:.9rem;color:var(--fg)}
+.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
+color:var(--muted);font-size:.82rem}
+</style></head><body><div class="wrap">
+<p class="eyebrow">분석·Export API 정합화 · 변경정리</p>
+<h1>자기소개서 · cover_letter.py — API 계약 정합화</h1>
+<p class="sub">main() 함수를 신설하고, 나머지 4종과 동일한 공통 envelope로 정렬했습니다.</p>
+<div class="meta">
+<span class="chip">대상: cover_letter.py</span>
+<span class="chip">기능: 자소서 제작</span>
+<span class="chip">근거: §3.3[1] (범위 밖·일관성 정렬)</span>
+<span class="chip">출력 내용 불변</span>
+</div>
+<div class="note">🎯 <b>대원칙</b> — 출력 <b>내용</b>(분석 결과·자소서 본문·레쥬메 필드 값)은 한 글자도 바꾸지 않았습니다. 백엔드·프론트가 공유하는 <b>반환 형식(envelope)</b>만 계약 문서에 맞춰 통일했습니다. <tt>schema_version</tt>은 문서 §3.5에 따라 <b>tasks.py(백엔드)가 주입</b>하므로 이 파일에는 넣지 않았습니다.</div>
+<h2>1. main() 함수 자체가 없던 문제</h2>
+<p><div class="note">ℹ️ <b>범위 안내</b> — 이 기능은 계약 문서에서 <b>명시적으로 "범위 밖"</b>으로 분류됩니다(arc-backend 전 브랜치에 코드 0건). 그럼에도 "5가지 기능을 모두, 모두 main()으로 종료" 요청에 따라 동일 형식으로 정렬했습니다.</div></p>
+<div class="card problem">
+<p><span class="tag p">문제</span>엔트리포인트가 <tt>if __name__ == "__main__":</tt> 블록에 <b>인라인</b>으로만 있어 main() 함수가 없었습니다. 다른 4종처럼 <tt>main(...)</tt>으로 호출·반환할 수 없었습니다. <span class="ref">계약 §3.3 [1] · 사용자 요구(모두 main으로 종료)</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span>파이프라인을 <b><tt>def main(...)</tt></b>로 감싸 신설하고, <tt>if __name__ == "__main__": main()</tt>으로 종료하도록 정리했습니다.</p>
+<div class="ba">
+<div class="b"><h4>Before</h4><pre><code>if __name__ == "__main__":
+    client = GeminiClient()
+    result = generate_application(...)
+    print(format_application(result))
+    # ← main() 함수 없음, 반환 없음</code></pre></div>
+<div class="a"><h4>After</h4><pre><code>def main(...):
+    client = GeminiClient()
+    result = generate_application(...)
+    print(format_application(result))
+    payload = asdict(result)
+    return {"status":"success",
+            "result": payload}
+
+if __name__ == "__main__":
+    main()</code></pre></div>
+</div>
+</div>
+<h2>2. 공통 envelope 반환 + 예외 처리</h2>
+<div class="card problem">
+<p><span class="tag p">문제</span>반환 형식이 없어 백엔드 통합 시 다른 분석기와 계약이 어긋납니다. <span class="ref">계약 §3.3 [1] · §3.6 #25·#26</span></p>
+</div>
+<div class="card solution">
+<p><span class="tag s">해결</span><tt>ApplicationResult</tt>(dataclass)를 <tt>asdict</tt>로 직렬화해 <tt>{status, result}</tt> envelope로 반환. 예외 시 <tt>{status:'error', message}</tt>. payload에는 status·vector가 없습니다.</p>
+</div>
+<div class="foot">자소서 생성은 계약 문서상 명시적으로 '범위 밖'(arc-backend에 코드 0건)입니다. 그럼에도 사용자 요청대로 나머지 4종과 동일한 반환 형식·main() 종료 구조로 정렬해 향후 통합 시 혼선을 없앴습니다. 자소서 본문·가이드·액션플랜 생성 내용은 불변입니다.</div>
+</div></body></html>
