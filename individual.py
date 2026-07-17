@@ -49,11 +49,11 @@ _ANALYSIS_MODEL  = "gemini-2.5-flash"
 _EMBEDDING_MODEL = "gemini-embedding-001"
 
 # 크롤러 설정
-_MAX_PAGES       = 30
-_MAX_PDFS        = 5
-_FETCH_TIMEOUT   = 15
-_MAX_CONTENT_MB  = 1
-_MIN_CRAWL_CHARS = 200
+_MAX_PAGES       = 50
+_MAX_PDFS        = 10
+_FETCH_TIMEOUT   = 30
+_MAX_CONTENT_MB  = 3
+_MIN_CRAWL_CHARS = 100000
 
 # 재시도 설정
 _MAX_RETRIES    = 4
