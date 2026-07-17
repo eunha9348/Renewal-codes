@@ -695,17 +695,15 @@ def main(
 if __name__ == "__main__":
     main(
         sources=[
-            "https://jimin-byun.com/index.html",
-            # "/path/to/career.txt",
-            # "직접 입력 텍스트...",
+            " ",
         ],
-        name_ko="변지민",
-        name_en="Jimin Byun",
+        name_ko="",
+        name_en="",
         email="",
         phone="",
         school="",
         department="",
-        links="https://jimin-byun.com",
+        links="",
         language="both",        # "ko" | "en" | "both"
         output_path="resume.json",
         deep_crawl=True,
