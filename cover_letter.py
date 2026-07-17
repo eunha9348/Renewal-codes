@@ -1146,7 +1146,7 @@ user_profile = UserProfile(
     ],
 
     projects=[
-        {"name": "LSTM 기반 코스피 변동성 예측 모델",
+        {"name": "",
          "detail": ""},
     ],
 
