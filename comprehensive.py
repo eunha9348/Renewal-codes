@@ -1645,13 +1645,6 @@ def main(user_input: list[str], school: str, department: str):
         }
     else:
         payload = {k: v for k, v in result.items() if k != "status"}
-        # ── 분석 이름 기본값 (FRT-119 대응, 부분) ──────────────────────
-        # 정식 이름("{첫 경험명} 등 {n}개 분석")은 계약 §4에 따라 서버가
-        # POST 시점에 experience_ids 로 확정한다 — analyzer 는 경험 목록을
-        # 모르므로 §4.1 폴백 형식("{생성일} 종합 분석")을 코드로(LLM 아님)
-        # 결정적으로 주입한다. 서버가 저장한 title 이 있으면 그쪽이 우선이며,
-        # 이 값은 title 부재 시 프론트가 빈칸 대신 쓸 수 있는 기본값이다.
-        payload.setdefault("analysis_title", f"{rd} 종합 분석")
         envelope = {"status": "success", "result": payload, "vector": vector}
 
     print(json.dumps(envelope, ensure_ascii=False, indent=2))
