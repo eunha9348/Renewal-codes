@@ -46,15 +46,20 @@ class SuccessResponse(BaseModel):
     """성공 응답 — vector 가 없는 analyzer(키워드·레쥬메·자소서)용.
 
     status 는 "success" 로 고정. result 에 분석 payload 를 담는다.
+    result 는 필수 — 성공인데 payload 가 없는 상태는 성립하지 않는다
+    (실패라면 ErrorResponse.message 로 표현할 것). ErrorResponse.message 필수와 대칭.
     """
     status: Literal["success"] = "success"
-    result: dict | None = None
+    result: dict
 
 
 class VectorSuccessResponse(SuccessResponse):
     """성공 응답 — vector 가 있는 analyzer(개별·종합)용.
 
-    임베딩 벡터는 result 밖 별도 필드로만 존재한다(§3.2). 임베딩 실패 시 None.
+    임베딩 벡터는 result 밖 별도 필드로만 존재한다(§3.2).
+    vector 는 옵셔널 — 임베딩 호출이 실패해도(get_embedding→None) 분석 자체는
+    성공일 수 있고, 계약도 vector 를 nullable 로 다룬다(tasks.py: r.get("vector")).
+    즉 '성공엔 result 필수, vector 는 있으면 담고 없으면 None' 이 의도된 설계다.
     """
     vector: list[float] | None = None
 
