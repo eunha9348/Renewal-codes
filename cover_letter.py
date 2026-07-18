@@ -44,7 +44,7 @@ except ImportError:
 import os
 import json as _json
 from dataclasses import dataclass, field, asdict
-from pydantic import BaseModel
+from analysis_response import AnalysisResponse
 
 
 # =============================================================================
@@ -1200,24 +1200,10 @@ QUESTIONS = [
 #     직무(job_key)/지역(region) 등을 아래에서 조정하세요.
 # =============================================================================
 # =============================================================================
-# 11. 공통 반환 모델 (Pydantic)
+# 11. [실행] Main (엔트리포인트) — 공통 Pydantic 응답 반환
 # =============================================================================
-class AnalysisResponse(BaseModel):
-    """공통 반환 모델 — API Endpoint 계약 envelope 의 Pydantic 판.
-
-    성공: status="success", result=payload(ApplicationResult asdict).
-    실패: status="error", message. 자소서 analyzer 는 vector 필드가 없다.
-    소비자(tasks.py 등)는 r.status·r.result 속성 또는 r.model_dump() 로 접근한다.
-    result 안에는 status 를 넣지 않는다(§3.6). schema_version 은 tasks.py 가 주입(§3.5).
-    """
-    status: str
-    result: dict | None = None
-    message: str | None = None
-
-
-# =============================================================================
-# 11-1. [실행] Main (엔트리포인트) — 공통 Pydantic 응답 반환
-# =============================================================================
+# 공통 반환 모델 AnalysisResponse 는 analysis_response.py 에서 import 한다
+# (상단 import 참조). 자소서 analyzer 는 vector 필드가 없다.
 def main(
     client=None,
     user: UserProfile = None,

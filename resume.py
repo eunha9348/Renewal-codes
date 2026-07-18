@@ -47,7 +47,7 @@ except ImportError:
 
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
+from analysis_response import AnalysisResponse
 
 
 # ══════════════════════════════════════════════
@@ -607,24 +607,10 @@ def generate(raw_content, personal, lang="ko"):
 
 
 # ══════════════════════════════════════════════
-# 공통 반환 모델 (Pydantic)
-# ══════════════════════════════════════════════
-class AnalysisResponse(BaseModel):
-    """공통 반환 모델 — API Endpoint 계약 envelope 의 Pydantic 판.
-
-    성공: status="success", result=payload(단일 레쥬메 또는 both 묶음).
-    실패: status="error", message. 레쥬메 analyzer 는 vector 필드가 없다(§3.2).
-    소비자(tasks.py 등)는 r.status·r.result 속성 또는 r.model_dump() 로 접근한다.
-    result 안에는 status 를 넣지 않는다(§3.6). schema_version 은 tasks.py 가 주입(§3.5).
-    """
-    status: str
-    result: dict | None = None
-    message: str | None = None
-
-
-# ══════════════════════════════════════════════
 # Entry Point
 # ══════════════════════════════════════════════
+# 공통 반환 모델 AnalysisResponse 는 analysis_response.py 에서 import 한다
+# (상단 import 참조). 레쥬메 analyzer 는 vector 필드가 없다(§3.2).
 def main(
     sources: list[str],
     name_ko: str = "",

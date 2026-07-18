@@ -38,7 +38,7 @@ from collections import deque
 from google import genai
 from google.genai import types
 import pypdf
-from pydantic import BaseModel
+from analysis_response import VectorAnalysisResponse as AnalysisResponse
 
 # ──────────────────────────────────────────────
 # Config
@@ -856,25 +856,10 @@ def _is_likely_single_item(text: str) -> bool:
 
 
 # ══════════════════════════════════════════════
-# 13  공통 반환 모델 (Pydantic)
+# 13  Main
 # ══════════════════════════════════════════════
-class AnalysisResponse(BaseModel):
-    """공통 반환 모델 — API Endpoint 계약 envelope 의 Pydantic 판.
-
-    성공: status="success", result=payload, vector(개별·종합만).
-    실패: status="error", message.
-    소비자(tasks.py 등)는 r.status·r.result·r.vector 속성 또는 r.model_dump() 로 접근한다.
-    result 안에는 status·vector 를 넣지 않는다(§3.6). schema_version 은 tasks.py 가 주입(§3.5).
-    """
-    status: str
-    result: dict | None = None
-    vector: list[float] | None = None
-    message: str | None = None
-
-
-# ══════════════════════════════════════════════
-# 14  Main
-# ══════════════════════════════════════════════
+# 공통 반환 모델 AnalysisResponse(=VectorAnalysisResponse) 는
+# analysis_response.py 에서 import 한다 (상단 import 참조).
 def main(user_input):
     ref_date = date.today()
     rd = ref_date.strftime("%Y-%m-%d")
