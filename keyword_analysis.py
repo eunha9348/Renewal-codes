@@ -102,6 +102,7 @@ from typing import Optional
 
 from google import genai
 from google.genai import types
+from pydantic import BaseModel
 
 try:
     import pypdf
@@ -2833,7 +2834,23 @@ TARGET   = ""                       # 목표 직무/시나리오 (없으면 빈 
 
 
 # ══════════════════════════════════════════════════════════════════
-# 10. Main (엔트리포인트)
+# 10. 공통 반환 모델 (Pydantic)
+# ══════════════════════════════════════════════════════════════════
+class AnalysisResponse(BaseModel):
+    """공통 반환 모델 — API Endpoint 계약 envelope 의 Pydantic 판.
+
+    성공: status="success", result=payload. 실패: status="error", message.
+    키워드 analyzer 는 vector 컬럼이 없으므로 vector 필드가 없다(§3.2).
+    소비자(tasks.py 등)는 r.status·r.result 속성 또는 r.model_dump() 로 접근한다.
+    result 안에는 status 를 넣지 않는다(§3.6). schema_version 은 tasks.py 가 주입(§3.5).
+    """
+    status: str
+    result: dict | None = None
+    message: str | None = None
+
+
+# ══════════════════════════════════════════════════════════════════
+# 11. Main (엔트리포인트)
 # ══════════════════════════════════════════════════════════════════
 
 def main(
@@ -2882,13 +2899,13 @@ def main(
         print("  또는 main(career_input=..., keywords=[...], target=...)로")
         print("  인자를 직접 전달해 실행할 수 있습니다.")
         print("=" * 60)
-        return {"status": "error", "message": "CAREER_INPUT / KEYWORDS 가 설정되지 않았습니다."}
+        return AnalysisResponse(status="error", message="CAREER_INPUT / KEYWORDS 가 설정되지 않았습니다.")
 
     # 1) 경력 파싱 (+ 임베딩 사전 생성)
     careers = parse_careers(career_input)
     if not careers:
         print("[main] 경력 파싱 결과가 비어 있어 분석을 중단합니다.")
-        return {"status": "error", "message": "경력 파싱 결과가 비어 있어 분석을 중단합니다."}
+        return AnalysisResponse(status="error", message="경력 파싱 결과가 비어 있어 분석을 중단합니다.")
 
     # 2) 키워드 분석 (경험 수에 따라 LLM/K-NN 자동 라우팅)
     result = analyze_keywords(keywords, careers, target=target)
@@ -2901,15 +2918,15 @@ def main(
     #      (keyword payload 는 _call_model 이 넣은 status 를 최상위에 갖고 있음)
     #    - keyword analyzer 는 vector 컬럼이 없으므로 vector 필드도 없다 (§3.2)
     if not isinstance(result, dict) or result.get("status") != "success":
-        return {
-            "status": "error",
-            "message": result.get("message", "키워드 분석에 실패했습니다.")
-                       if isinstance(result, dict) else "키워드 분석에 실패했습니다.",
-        }
+        return AnalysisResponse(
+            status="error",
+            message=(result.get("message", "키워드 분석에 실패했습니다.")
+                     if isinstance(result, dict) else "키워드 분석에 실패했습니다."),
+        )
     payload = {k: v for k, v in result.items() if k != "status"}
-    return {"status": "success", "result": payload}
+    return AnalysisResponse(status="success", result=payload)
 
 
 if __name__ == "__main__":
     envelope = main()
-    result   = envelope.get("result", {})   # 분석 payload (envelope 안쪽)
+    result   = envelope.result or {}   # 분석 payload (envelope 안쪽)

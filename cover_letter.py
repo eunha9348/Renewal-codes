@@ -44,6 +44,7 @@ except ImportError:
 import os
 import json as _json
 from dataclasses import dataclass, field, asdict
+from pydantic import BaseModel
 
 
 # =============================================================================
@@ -1199,7 +1200,23 @@ QUESTIONS = [
 #     직무(job_key)/지역(region) 등을 아래에서 조정하세요.
 # =============================================================================
 # =============================================================================
-# 11. [실행] Main (엔트리포인트) — 공통 envelope 반환
+# 11. 공통 반환 모델 (Pydantic)
+# =============================================================================
+class AnalysisResponse(BaseModel):
+    """공통 반환 모델 — API Endpoint 계약 envelope 의 Pydantic 판.
+
+    성공: status="success", result=payload(ApplicationResult asdict).
+    실패: status="error", message. 자소서 analyzer 는 vector 필드가 없다.
+    소비자(tasks.py 등)는 r.status·r.result 속성 또는 r.model_dump() 로 접근한다.
+    result 안에는 status 를 넣지 않는다(§3.6). schema_version 은 tasks.py 가 주입(§3.5).
+    """
+    status: str
+    result: dict | None = None
+    message: str | None = None
+
+
+# =============================================================================
+# 11-1. [실행] Main (엔트리포인트) — 공통 Pydantic 응답 반환
 # =============================================================================
 def main(
     client=None,
@@ -1252,16 +1269,16 @@ def main(
             polish=polish,               # 최종 문체 다듬기 패스(어미·반복 정리)
         )
     except Exception as e:
-        error = {"status": "error", "message": str(e)}
-        print(_json.dumps(error, ensure_ascii=False))
-        return error
+        resp = AnalysisResponse(status="error", message=str(e))
+        print(resp.model_dump_json(indent=2, exclude_none=True))
+        return resp
 
     # 사람이 읽는 CLI 출력은 그대로 유지 (출력 내용 불변)
     print(format_application(result))
 
     # ApplicationResult(dataclass) → payload dict 직렬화 (내용 불변)
     payload = asdict(result)
-    return {"status": "success", "result": payload}
+    return AnalysisResponse(status="success", result=payload)
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ from collections import deque
 from google import genai
 from google.genai import types
 import pypdf
+from pydantic import BaseModel
 
 # ──────────────────────────────────────────────
 # Config
@@ -855,7 +856,24 @@ def _is_likely_single_item(text: str) -> bool:
 
 
 # ══════════════════════════════════════════════
-# 13  Main
+# 13  공통 반환 모델 (Pydantic)
+# ══════════════════════════════════════════════
+class AnalysisResponse(BaseModel):
+    """공통 반환 모델 — API Endpoint 계약 envelope 의 Pydantic 판.
+
+    성공: status="success", result=payload, vector(개별·종합만).
+    실패: status="error", message.
+    소비자(tasks.py 등)는 r.status·r.result·r.vector 속성 또는 r.model_dump() 로 접근한다.
+    result 안에는 status·vector 를 넣지 않는다(§3.6). schema_version 은 tasks.py 가 주입(§3.5).
+    """
+    status: str
+    result: dict | None = None
+    vector: list[float] | None = None
+    message: str | None = None
+
+
+# ══════════════════════════════════════════════
+# 14  Main
 # ══════════════════════════════════════════════
 def main(user_input):
     ref_date = date.today()
@@ -871,12 +889,12 @@ def main(user_input):
     raw_content = get_user_input(user_input)
 
     if len(raw_content.strip()) < 5:
-        error_result = {
-            "status": "error",
-            "message": "입력 데이터가 너무 짧습니다. 분석할 경력/자격증/활동을 입력해주세요."
-        }
-        print(json.dumps(error_result, ensure_ascii=False, indent=2))
-        return error_result
+        resp = AnalysisResponse(
+            status="error",
+            message="입력 데이터가 너무 짧습니다. 분석할 경력/자격증/활동을 입력해주세요.",
+        )
+        print(resp.model_dump_json(indent=2, exclude_none=True))
+        return resp
 
     print("\n[1] 임베딩 벡터 생성 중...", flush=True)
     vector = get_embedding(raw_content)
@@ -920,17 +938,17 @@ def main(user_input):
     # 규약: result(payload) 안에는 status·vector 를 넣지 않는다 (§3.6 #25·#26).
     #       status 는 envelope 최상위로만, vector 는 별도 필드로만 나간다.
     if not isinstance(result, dict) or result.get("status") == "error":
-        envelope = {
-            "status": "error",
-            "message": result.get("message", "분석에 실패했습니다.")
-                       if isinstance(result, dict) else "분석에 실패했습니다.",
-        }
+        resp = AnalysisResponse(
+            status="error",
+            message=(result.get("message", "분석에 실패했습니다.")
+                     if isinstance(result, dict) else "분석에 실패했습니다."),
+        )
     else:
         payload = {k: v for k, v in result.items() if k != "status"}
-        envelope = {"status": "success", "result": payload, "vector": vector}
+        resp = AnalysisResponse(status="success", result=payload, vector=vector)
 
-    print(json.dumps(envelope, ensure_ascii=False, indent=2))
-    return envelope
+    print(resp.model_dump_json(indent=2, exclude_none=True))
+    return resp
 
 
 if __name__ == "__main__":
