@@ -61,7 +61,7 @@ class VectorSuccessResponse(SuccessResponse):
     성공일 수 있고, 계약도 vector 를 nullable 로 다룬다(tasks.py: r.get("vector")).
     즉 '성공엔 result 필수, vector 는 있으면 담고 없으면 None' 이 의도된 설계다.
     """
-    vector: list[float] | None = None
+    vector: list[float]
 
 
 # ══════════════════════════════════════════════
