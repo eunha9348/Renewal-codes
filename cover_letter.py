@@ -44,7 +44,7 @@ except ImportError:
 import os
 import json as _json
 from dataclasses import dataclass, field, asdict
-from analysis_response import AnalysisResponse
+from analysis_response import SuccessResponse, ErrorResponse
 
 
 # =============================================================================
@@ -1202,8 +1202,9 @@ QUESTIONS = [
 # =============================================================================
 # 11. [실행] Main (엔트리포인트) — 공통 Pydantic 응답 반환
 # =============================================================================
-# 공통 반환 모델 AnalysisResponse 는 analysis_response.py 에서 import 한다
-# (상단 import 참조). 자소서 analyzer 는 vector 필드가 없다.
+# 반환 모델은 analysis_response.py 에서 import (성공/실패 분리):
+#   성공 → SuccessResponse(result)  /  실패 → ErrorResponse(message)
+# 자소서 analyzer 는 vector 필드가 없다.
 def main(
     client=None,
     user: UserProfile = None,
@@ -1255,7 +1256,7 @@ def main(
             polish=polish,               # 최종 문체 다듬기 패스(어미·반복 정리)
         )
     except Exception as e:
-        resp = AnalysisResponse(status="error", message=str(e))
+        resp = ErrorResponse(message=str(e))
         print(resp.model_dump_json(indent=2, exclude_none=True))
         return resp
 
@@ -1264,7 +1265,7 @@ def main(
 
     # ApplicationResult(dataclass) → payload dict 직렬화 (내용 불변)
     payload = asdict(result)
-    return AnalysisResponse(status="success", result=payload)
+    return SuccessResponse(result=payload)
 
 
 if __name__ == "__main__":

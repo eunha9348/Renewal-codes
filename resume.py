@@ -47,7 +47,7 @@ except ImportError:
 
 from google import genai
 from google.genai import types
-from analysis_response import AnalysisResponse
+from analysis_response import SuccessResponse, ErrorResponse
 
 
 # ══════════════════════════════════════════════
@@ -609,8 +609,9 @@ def generate(raw_content, personal, lang="ko"):
 # ══════════════════════════════════════════════
 # Entry Point
 # ══════════════════════════════════════════════
-# 공통 반환 모델 AnalysisResponse 는 analysis_response.py 에서 import 한다
-# (상단 import 참조). 레쥬메 analyzer 는 vector 필드가 없다(§3.2).
+# 반환 모델은 analysis_response.py 에서 import (성공/실패 분리):
+#   성공 → SuccessResponse(result)  /  실패 → ErrorResponse(message)
+# 레쥬메 analyzer 는 vector 필드가 없다(§3.2).
 def main(
     sources: list[str],
     name_ko: str = "",
@@ -653,7 +654,7 @@ def main(
         # 대신 실패 envelope 를 반환해 tasks.py 가 /internal/resume/failure 로
         # status=failed 를 기록할 수 있게 한다.
         print("ERROR: 입력 데이터 없음", flush=True)
-        return AnalysisResponse(status="error", message="입력 데이터가 없습니다.")
+        return ErrorResponse(message="입력 데이터가 없습니다.")
 
     raw_content = "\n\n---\n\n".join(parts)
     print(f"\n총 입력: {len(raw_content)}자\n", flush=True)
@@ -689,7 +690,7 @@ def main(
     #   - "both" 는 API 경계 밖(§2.4)이라 CLI 편의용으로만 유지: {ko, en} 묶음.
     #   - resume payload 에는 status/vector 가 없으므로 그대로 담는다 (#25·#26).
     final_result = results if language == "both" else results[language]
-    return AnalysisResponse(status="success", result=final_result)
+    return SuccessResponse(result=final_result)
 
 
 # ══════════════════════════════════════════════

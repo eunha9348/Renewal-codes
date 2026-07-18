@@ -43,7 +43,7 @@ from collections import deque
 from google import genai
 from google.genai import types
 import pypdf
-from analysis_response import VectorAnalysisResponse as AnalysisResponse
+from analysis_response import VectorSuccessResponse, ErrorResponse
 
 # ──────────────────────────────────────────────
 # Config
@@ -1533,8 +1533,8 @@ def _log_strength_summary(result: dict) -> None:
 # ══════════════════════════════════════════════
 # 21  Main (v2.0 — 강점 로그 먼저, 냉정 진단 뒤)
 # ══════════════════════════════════════════════
-# 공통 반환 모델 AnalysisResponse(=VectorAnalysisResponse) 는
-# analysis_response.py 에서 import 한다 (상단 import 참조).
+# 반환 모델은 analysis_response.py 에서 import (성공/실패 분리):
+#   성공 → VectorSuccessResponse(result, vector)  /  실패 → ErrorResponse(message)
 def main(user_input: list[str], school: str, department: str):
     import sys
     ref_date = date.today()
@@ -1551,8 +1551,7 @@ def main(user_input: list[str], school: str, department: str):
     raw_content = get_user_input(user_input)
 
     if len(raw_content.strip()) < 10:
-        resp = AnalysisResponse(
-            status="error",
+        resp = ErrorResponse(
             message="입력 데이터가 너무 짧습니다. 최소 10자 이상 입력하세요.",
         )
         print(resp.model_dump_json(indent=2, exclude_none=True))
@@ -1641,14 +1640,13 @@ def main(user_input: list[str], school: str, department: str):
     # 규약: result(payload) 안에는 status·vector 를 넣지 않는다 (§3.6 #25·#26).
     #       vector 는 별도 필드로만, status 는 envelope 최상위로만 나간다.
     if not isinstance(result, dict) or result.get("status") == "error":
-        resp = AnalysisResponse(
-            status="error",
+        resp = ErrorResponse(
             message=(result.get("message", "분석에 실패했습니다.")
                      if isinstance(result, dict) else "분석에 실패했습니다."),
         )
     else:
         payload = {k: v for k, v in result.items() if k != "status"}
-        resp = AnalysisResponse(status="success", result=payload, vector=vector)
+        resp = VectorSuccessResponse(result=payload, vector=vector)
 
     print(resp.model_dump_json(indent=2, exclude_none=True))
     return resp
