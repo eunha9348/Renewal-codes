@@ -1,5 +1,5 @@
 """
-resume_generator.py  (Selective Ver. — 직무/템플릿/경험선택 지원)
+resume_generator.py  (2.0 Ver. — 직무/템플릿/경험선택 지원)
 ====================
 유저 데이터 → Resume JSON 출력 (Colab 완전 독립 실행)
 
